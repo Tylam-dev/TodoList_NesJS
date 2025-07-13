@@ -1,0 +1,3 @@
+export enum ProviderEnums{
+    ASYNC_PRISMA_CONNECTION = "ASYNC_PRISMA_CONNECTION"
+}
