@@ -1,7 +1,6 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { UpdateToDoDto } from './dto/update-to-do.dto';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ProviderEnums } from 'src/enums/ProvidersEnum';
-import { Prisma, PrismaClient } from 'generated/prisma/client';
+import { Prisma, PrismaClient, Todo } from 'generated/prisma/client';
 import { ToDo } from './entities/to-do.entity';
 
 @Injectable()
@@ -12,6 +11,8 @@ export class ToDoService
     private prisma: PrismaClient
   ){}
   create(createTodo: ToDo) {
+    this.checkHour(createTodo.dueDate)
+
     let newTodo: Prisma.TodoCreateInput ={
       title: createTodo.title,
       description: createTodo.description,
@@ -27,18 +28,60 @@ export class ToDoService
   }
 
   findAll() {
-    return `This action returns all toDo`;
+    return this.prisma.todo.findMany({
+      where: {
+        deleteAt: null
+      }
+    });
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} toDo`;
+    return this.prisma.todo.findFirst({
+      where: {
+        id: id
+      },
+      omit:{
+        deleteAt: true
+      }
+    })
   }
 
-  update(id: number, updateToDoDto: UpdateToDoDto) {
-    return `This action updates a #${id} toDo`;
+  update(id: number, updateToDoDto: ToDo) {
+
+    if (updateToDoDto.dueDate != null)
+      this.checkHour(updateToDoDto.dueDate)
+    
+    return this.prisma.todo.update({
+      where:{
+        id: id
+      },
+      data:{
+        title: updateToDoDto.title,
+        description: updateToDoDto.description,
+        dueDate: updateToDoDto.dueDate,
+        status: updateToDoDto?.status,
+        priority: updateToDoDto.priority
+      }
+    });
   }
 
   remove(id: number) {
-    return `This action removes a #${id} toDo`;
+    return this.prisma.todo.update({
+      where:{
+        id: id
+      },
+      data:{
+        deleteAt: new Date()
+      }
+    })
+  }
+  private checkHour(dateHour: Date){
+    let existingTodo = this.prisma.todo.findFirst({
+      where:{
+        dueDate: dateHour
+      }  
+    })
+    if(existingTodo != null) 
+      throw new HttpException("there is an existing ToDo at the same time.", HttpStatus.BAD_REQUEST)
   }
 }

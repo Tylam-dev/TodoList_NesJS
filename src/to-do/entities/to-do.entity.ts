@@ -6,7 +6,7 @@ export class ToDo {
     public description: string,
     public title: string,
     public status: TodoStatus,
-    public dueDate: Date | null,
+    public dueDate: Date,
     public createdAt: Date | null,
     public priority: number,
     public updatedAt: Date | null,
