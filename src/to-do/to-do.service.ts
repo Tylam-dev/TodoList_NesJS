@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ProviderEnums } from 'src/enums/ProvidersEnum';
-import { Prisma, PrismaClient, Todo } from 'generated/prisma/client';
+import { Prisma, PrismaClient} from 'generated/prisma/client';
 import { ToDo } from './entities/to-do.entity';
 
 @Injectable()
